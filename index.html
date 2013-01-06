@@ -1,0 +1,126 @@
+<html><head> 
+  <script type="text/javascript" src="static/board.js"></script>
+  <script type="text/javascript" src="static/hopfield.js"></script>
+<style type="text/css">
+  .cell {
+    width:25px;
+    height:25px;
+    position:absolute;
+    background-color:blue;
+  }
+  .activated {
+    background-color:red;
+  }
+
+  .deactivated {
+    background-color:blue;
+  }
+</style>
+<script language="javascript"> 
+
+
+
+    var patterns = new Array(2);
+    var pattern = new Array(36);
+    var weights = undefined;
+    for (var i = 0; i < 36; i++) pattern[i] = 0;
+
+    var cell_click = function(t) {
+      var index = parseInt(t.currentTarget.id);
+      if (pattern[index] == 1) {
+        t.currentTarget.className= "cell deactivated";
+        pattern[index] = 0;
+      } else {
+        pattern[index] = 1;
+        t.currentTarget.className= "cell activated";
+      }
+    }
+
+    var add_pattern = function() {
+        for (p in patterns) {
+            if (compare(pattern, patterns[p])) return; //duplicated out
+        }
+        console.log(pattern);
+        patterns.push(pattern.slice());
+    }
+    var clean = function() {
+        weights = undefined;
+        clean_board();
+    }
+    var infer = function() {
+      if (weights == undefined){
+        weights = calculate_weights(patterns, 36);
+      }
+      infered = update_net(pattern, weights, 36);
+      draw_pattern(infered);
+    }
+
+    var clean_board = function() {
+        for (var i = 0; i < 36; i++) pattern[i] = 0;
+        draw_pattern(pattern);
+    }
+
+    var add_pattern_example = function(p) {
+        switch(p){
+          case 'U':
+            pattern = [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1];
+            add_pattern();
+            break;
+          case 'T':
+            pattern = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0];
+            add_pattern();
+            break;
+          case '_':
+            pattern = [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0];
+            break;
+          case '-':
+            pattern = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0];
+            break;
+        }
+        draw_pattern(pattern);
+    }
+
+    var onload = function() {
+       create_board(6, 100,100, cell_click);
+     }
+
+  </script> 
+</head> 
+<body onload="onload()"> 
+  <div id="">
+    This is an example of a Hopfield Network. It's based on <a href="http://www.cs.ucla.edu/~rosen/161/notes/hopfield.html">http://www.cs.ucla.edu/~rosen/161/notes/hopfield.html</a> and 
+    <a href="http://lcn.epfl.ch/tutorial/english/hopfield/html/index.html">http://lcn.epfl.ch/tutorial/english/hopfield/html/index.html</a>. The purpose of it is just learning.
+        How it works:
+        <ul>
+          <li>
+            1. Draw a pattern (clicking in each square, sorry)
+          </li>
+          <li>
+            2. Press "add pattern" to memorize it.
+          </li>
+          <li>
+            3. Repeat 1 and 2 to add more patterns. (press "clean board" to, you know)
+          </li>
+          <li>
+            4. Draw a pattern you want the net to recognize.
+          </li>
+          <li>
+            5. Press "infer".
+          </li>
+        </ul>
+        For example:
+          <ul>
+            <li> Add "U" pattern. <input type="button" onclick="add_pattern_example('U'); this.disabled=true;" value="add"></li>
+            <li> Add "T" pattern. <input type="button" onclick="add_pattern_example('T');this.disabled=true;" value="add"></li>
+            <li> Add the blurry pattern. <input type="button" onclick="add_pattern_example('_')" value="add"> or this one <input type="button" onclick="add_pattern_example('-')" value="add"> or draw one yourself</li>
+            <li> Press Infer</li>
+          </ul>
+    </div>
+    <div id="board" style="position:absolute">
+      <input type="button" onclick="add_pattern()" value="add pattern"> 
+      <input type="button" onclick="infer()" value="infer"> 
+      <input type="button" onclick="clean_board()" value="clean board"> 
+      <input type="button" onclick="clean()" value="clean"> 
+    </div>
+</body> 
+</html>
